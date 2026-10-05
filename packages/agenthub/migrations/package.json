@@ -1,0 +1,16 @@
+{
+  "name": "@agenthub/migrations",
+  "description": "AgentHub PostgreSQL schema 版本管理（dbmate 封装 + 迁移 SQL）",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dbmate": "node run-dbmate.mjs",
+    "dbmate:up": "node run-dbmate.mjs up",
+    "dbmate:status": "node run-dbmate.mjs status",
+    "dbmate:rollback": "node run-dbmate.mjs rollback"
+  },
+  "devDependencies": {
+    "dbmate": "^2.14.0"
+  }
+}

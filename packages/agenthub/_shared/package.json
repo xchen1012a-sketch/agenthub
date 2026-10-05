@@ -1,0 +1,33 @@
+{
+  "name": "@agenthub/_shared",
+  "description": "AgentHub 共享基础设施：U3 八字段日志 / TraceId 生命周期 / 错误 envelope / v1 核心事件类型 / 凭证脱敏",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/types/**/*.d.ts"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/dsh-brand": "workspace:~",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "workspace:~",
+    "@types/pg": "^8.15.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "workspace:~"
+  }
+}

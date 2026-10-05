@@ -1,0 +1,61 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 28rem;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-secondary, rgba(127, 127, 127, .28));
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-elevated, rgba(0, 0, 0, .18));
+  color: var(--dsw-alias-label-primary, inherit);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.note {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary, inherit);
+}
+
+.action {
+  align-self: flex-start;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dsw-alias-interactive-bg, rgba(255, 255, 255, .12));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.action:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, .2));
+}
+
+.action:disabled {
+  cursor: default;
+  opacity: .65;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  padding: 2px 0;
+  font-size: 13px;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.phase {
+  color: var(--dsw-alias-label-secondary, inherit);
+}

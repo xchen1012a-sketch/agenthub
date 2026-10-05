@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../_shared"
+    },
+    {
+      "path": "../../core/session"
+    },
+    {
+      "path": "../../session/session-persistence"
+    },
+    {
+      "path": "../../../vendor/cordis"
+    }
+  ]
+}

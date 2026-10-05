@@ -1,0 +1,33 @@
+{
+  "name": "@agenthub/analytics",
+  "description": "AgentHub 运营分析：只读聚合 6 类指标（Tool 调用量/成功率/平均耗时/Badcase 分布/Project 活跃度/记忆确认率），P5 阶段书 §7.1-1",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/types/**/*.d.ts"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "workspace:~"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "workspace:~",
+    "@types/pg": "^8.15.0",
+    "pg": "^8.13.0"
+  },
+  "dependencies": {
+    "@agenthub/_shared": "workspace:*"
+  }
+}

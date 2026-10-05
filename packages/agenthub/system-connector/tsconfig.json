@@ -1,0 +1,30 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../_shared"
+    },
+    {
+      "path": "../../core/tools"
+    },
+    {
+      "path": "../../host/webserver"
+    },
+    {
+      "path": "../../llm/llm"
+    },
+    {
+      "path": "../../../vendor/cordis"
+    },
+    {
+      "path": "../../../vendor/schemastery"
+    }
+  ]
+}

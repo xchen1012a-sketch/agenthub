@@ -1,0 +1,16 @@
+{
+  "name": "@agenthub/e2e",
+  "description": "AgentHub 端到端验收：真进程 + 真库 + 真浏览器（P5 阶段书 §7.1-3）",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./lifecycle": "./src/lifecycle.ts",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "playwright": "^1.49.0"
+  }
+}

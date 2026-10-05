@@ -1,0 +1,115 @@
+# =============================================================================
+# AgentHub · 插件注册与配置（阶段书 §3.1 #12/#15）
+#
+# 本文件同时是 Cordis --patch overlay：start:agenthub 以
+#   dsh web --port 5080 --patch apps/web/config/agenthub.yaml
+# 方式挂载，把 @agenthub/* 插件 insert 进 web profile 的空根配置树。
+#
+# 注册顺序（.ai-spec 40-extension.md EXT-3 / 10-architecture.md ARCH-6：强依赖不可颠倒）：
+#   基础设施：postgres-session-provider → auth → rbac → project
+#   凭证/工具：credential-vault → openapi-ingest → project-tool-scope
+#   审批/审计：approval → audit → system-connector
+#   前端：health → ui（ui 最后，依赖先行）
+#   强依赖不可颠倒：rbac←auth / project←rbac / project-tool-scope←project /
+#   approval←project-tool-scope / audit←approval；credential-vault←auth(db) /
+#   openapi-ingest←auth(db) / system-connector←credential-vault(vault)+project-tool-scope(tool-scope)+auth(db)
+#
+# 相关规范（唯一事实来源；ID 可全局检索）：
+#   - deepseek-harness/.ai-spec/40-extension.md EXT-3（命名与注册）/ EXT-4（导出形态）
+#   - deepseek-harness/.ai-spec/10-architecture.md ARCH-6（运行时依赖必须 inject 声明）
+#   - deepseek-harness/.ai-spec/20-security.md SEC-1（身份不由模型决定）
+# =============================================================================
+
+# AgentHub 的 Tool 必须由 Project scope + 审批链显式开放。在 P1 尚无这条链路时，
+# 使用空工具集 preset，并屏蔽上游会挂载 Shell / Jobs 的可选 presets；不修改上游 bundle。
+- id: agent-preset-registry
+  config:
+    default: agenthub
+
+- id: preset-standard
+  disabled: true
+
+- id: preset-ptc
+  disabled: true
+
+- id: preset-minimal
+  disabled: true
+
+- id: preset-cordis
+  disabled: true
+
+# 对话不再选择本机文件夹。这条占用者卸掉之后，侧边栏的「添加工作区」自己隐藏。
+- id: directory-picker
+  disabled: true
+
+# 侧边浏览器：员工在这里登录外部系统。它是用户侧浏览面板，不是 ARCH-5 禁止的 Browser Use。
+# Web profile 默认关掉它；AgentHub 需要打开。
+- id: ui-sidebar-browser
+  disabled: false
+
+# Session 持久化换 Postgres Provider（P2 方案书 T8）：按 id 摘除 base bundle
+# 的 session-persistence-jsonl 行（last-write-wins），并挂载本包替换
+# `ctx.sessionPersistence`——Session 不再落 JSONL 文件，改存
+# agenthub_sessions + agenthub_session_events（迁移 0009）。
+- id: session-persistence-jsonl
+  disabled: true
+
+- insert:
+    - id: preset-agenthub
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: agenthub
+        plugins: []
+    - id: agenthub-session-postgres
+      name: '@agenthub/postgres-session-provider'
+    - id: agenthub-auth
+      name: '@agenthub/auth'
+    - id: agenthub-rbac
+      name: '@agenthub/rbac'
+    - id: agenthub-project
+      name: '@agenthub/project'
+    # 项目记忆：pgvector 落库 + 检索原语 + 会话结束提取候选 + 组装期注入（P4 阶段 B，D25 前移注册）。
+    # 注册顺序：仅依赖 agenthub/db（auth provide），不依赖 approval / audit。
+    - id: agenthub-project-memory
+      name: '@agenthub/project-memory'
+      config:
+        # 会话结束提取候选。开启后要求 deployment 的 EMBEDDING/LLM 端点与密钥完整，
+        # 缺配置启动即失败（ARCH-7 响亮失败，不再静默降级）。
+        extraction: true
+        topK: 8
+        extractMaxCandidates: 5
+    # 凭证 Vault：AES-256-GCM，provide agenthub/vault；依赖 agenthub/db（auth provide）。
+    - id: agenthub-credential-vault
+      name: '@agenthub/credential-vault'
+    # OpenAPI 导入：OpenAPI 3.x → Tool 草稿行；只依赖 agenthub/db。
+    - id: agenthub-openapi-ingest
+      name: '@agenthub/openapi-ingest'
+      config:
+        # 草稿风险等级交给 LLM 判定（阶段 C3-A）。分级失败不阻断导入，但回落 read
+        # 并记入回执（BND-3 默认拒绝 / QA-6 显式降级）。开启却缺端点密钥则启动失败（ARCH-7）。
+        riskGrading: true
+    - id: agenthub-project-tool-scope
+      name: '@agenthub/project-tool-scope'
+    - id: agenthub-approval
+      name: '@agenthub/approval'
+      config:
+        failClosed: true
+        timeoutHours: 1
+        minRiskLevel: write
+    - id: agenthub-audit
+      name: '@agenthub/audit'
+    # 运营指标聚合（P5）：只读，provide agenthub/analytics；仅依赖 agenthub/db（auth provide）。
+    - id: agenthub-analytics
+      name: '@agenthub/analytics'
+    # 外部系统连接器：连接 CRUD + connector Tool 执行体 + session 反代捕获；
+    # 依赖 agenthub/vault + agenthub/tool-scope + agenthub/auth（故排在 audit 之后）。
+    - id: agenthub-system-connector
+      name: '@agenthub/system-connector'
+      config:
+        # 登录站点必须与员工打开平台的地址不同站。开发阶段换主机名即可：
+        # 平台用 http://127.0.0.1:5080 ，登录站点用 http://localhost:5080 。
+        loginOrigin: 'http://localhost:5080'
+    - id: agenthub-health
+      name: '@agenthub/health'
+    - id: agenthub-ui
+      name: '@agenthub/ui'
